@@ -1,57 +1,17 @@
 package org.concordia.soen.smartpad;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JTextPane;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.Element;
-import javax.swing.text.ElementIterator;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
+import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
 
 /*
  * A text editor program with basic edit and format functions.
@@ -64,10 +24,7 @@ public class SmartPad {
 	private UndoManager undoMgr__;
 	private File file__;
 
-	enum BulletActionType {INSERT, REMOVE};
-	enum NumbersActionType {INSERT, REMOVE};
-	enum UndoActionType {UNDO, REDO};
-	
+
 	// This flag checks true if the caret position within a bulleted para
 	// is at the first text position after the bullet (bullet char + space).
 	// Also see EditorCaretListener and BulletParaKeyListener.
@@ -139,18 +96,38 @@ public class SmartPad {
 		JButton copyButton = new JButton(copyIcon);
 		ImageIcon pasteIcon = createImageIcon("/resources/paste.png", "Copy");
 		JButton pasteButton = new JButton(pasteIcon);
-		
-		
+		ImageIcon printIcon = createImageIcon("/resources/print.png", "Copy");
+		JButton printButton = new JButton(printIcon);
+
+        JTextField searchField = new JTextField();
+        searchField.setText("Search");
+
+        searchField.addFocusListener(new FocusListener() {
+            public void focusGained(FocusEvent e) {
+                searchField.setText("");
+            }
+
+            public void focusLost(FocusEvent e) {
+                searchField.setText("Search");
+            }
+        });
+
 		JPanel panel1 = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		panel1.add(copyButton);
 		panel1.add(pasteButton);
+		panel1.add(printButton);
 		//panel1.add(textAlignComboBox__);
-		//panel1.add(new JSeparator(SwingConstants.VERTICAL));
+		panel1.add(new JSeparator(SwingConstants.VERTICAL));
+        panel1.add(new JSeparator(SwingConstants.VERTICAL));
+        panel1.add(new JSeparator(SwingConstants.VERTICAL));
+        panel1.add(new JSeparator(SwingConstants.VERTICAL));
+		panel1.add(searchField);
 		//panel1.add(fontSizeComboBox__);
 		//panel1.add(new JSeparator(SwingConstants.VERTICAL));
 		//panel1.add(fontFamilyComboBox__);		
-		
+
 		JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		//panel2.add(searchField);
 		panel2.add(new JSeparator(SwingConstants.VERTICAL));
 		panel2.add(new JSeparator(SwingConstants.VERTICAL));
 		panel2.add(new JSeparator(SwingConstants.VERTICAL));
@@ -160,8 +137,25 @@ public class SmartPad {
 		toolBarPanel.add(panel1);
 		toolBarPanel.add(panel2);
 
-		frame__.add(toolBarPanel, BorderLayout.NORTH);
+		JTextField newFile1 = new JTextField();
+		newFile1.setText("new file 1");
+        ImageIcon newIcon = createImageIcon("/resources/plus.png", "New");
+        JButton newButton = new JButton(newIcon);
+
+        JPanel filesPanel = new JPanel();
+        filesPanel.add(newFile1);
+        JPanel newButtonPanel = new JPanel();
+        newButtonPanel.add(newButton);
+
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.PAGE_AXIS));
+        leftPanel.add(filesPanel);
+        leftPanel.add(newButtonPanel);
+
+
+        frame__.add(toolBarPanel, BorderLayout.NORTH);
 		frame__.add(editorScrollPane, BorderLayout.CENTER);
+		frame__.add(leftPanel, BorderLayout.WEST);
 
 		JMenuBar menuBar = new JMenuBar();
 		JMenu fileMenu = new JMenu("File");
@@ -249,13 +243,9 @@ public class SmartPad {
 	}
 
 	private boolean isBulletedPara(int paraEleStart) {
-						
-		if (getParaFirstCharacter(paraEleStart) == BULLET_CHAR) {
-			
-			return true;
-		}
-			
-		return false;
+
+		return getParaFirstCharacter(paraEleStart) == BULLET_CHAR;
+
 	}
 	
 	private char getParaFirstCharacter(int paraEleStart) {
@@ -278,22 +268,13 @@ public class SmartPad {
 		AttributeSet attrSet = getParaStartAttributes(paraEleStart);		
 		Integer paraNum = (Integer) attrSet.getAttribute(NUMBERS_ATTR);
 
-		if ((paraNum == null) || (! isFirstCharNumber(paraEleStart))) {
-
-			return false;
-		}
-
-		return true;
+		return (paraNum != null) && (isFirstCharNumber(paraEleStart));
 	}
 		
 	private boolean isFirstCharNumber(int paraEleStart) {
-			
-		if (Character.isDigit(getParaFirstCharacter(paraEleStart))) {
-			
-			return true;
-		}
-		
-		return false;
+
+		return Character.isDigit(getParaFirstCharacter(paraEleStart));
+
 	}
 
 	/*
@@ -416,13 +397,9 @@ public class SmartPad {
 		private boolean isBulletedParaForPos(int caretPos) {
 
 			Element paraEle = getEditorDocument().getParagraphElement(caretPos);
-		
-			if (isBulletedPara(paraEle.getStartOffset())) {
-			
-				return true;
-			}
-			
-			return false;
+
+			return isBulletedPara(paraEle.getStartOffset());
+
 		}
 		
 		// This method is used with Enter key press routine.
@@ -790,13 +767,9 @@ public class SmartPad {
 		private boolean isNumberedParaForPos(int caretPos) {
 
 			Element paraEle = getEditorDocument().getParagraphElement(caretPos);
-		
-			if (isNumberedPara(paraEle.getStartOffset())) {
-			
-				return true;
-			}
-			
-			return false;
+
+			return isNumberedPara(paraEle.getStartOffset());
+
 		}
 		
 		/*
