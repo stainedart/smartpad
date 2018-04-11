@@ -79,6 +79,7 @@ public class SmartPad {
 	    }
 	}
 
+	//TODO this is the main point of entry in the application
 	private void createAndShowGUI() {
 	
 		frame__ = new JFrame();
@@ -90,18 +91,17 @@ public class SmartPad {
 		editor__.addKeyListener(new BulletParaKeyListener());
 		editor__.addKeyListener(new NumbersParaKeyListener());
 		editor__.addCaretListener(new EditorCaretListener());
-
 		undoMgr__ = new UndoManager();
+
+		//Icon bar with the images. Just put the images in the resources folder icons should be 24 x 24 to be the same size as the other ones.
 		ImageIcon copyIcon = createImageIcon("/resources/copy.png", "Copy");
 		JButton copyButton = new JButton(copyIcon);
 		ImageIcon pasteIcon = createImageIcon("/resources/paste.png", "Copy");
 		JButton pasteButton = new JButton(pasteIcon);
 		ImageIcon printIcon = createImageIcon("/resources/print.png", "Copy");
 		JButton printButton = new JButton(printIcon);
-
         JTextField searchField = new JTextField();
         searchField.setText("Search");
-
         searchField.addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
                 searchField.setText("");
@@ -111,42 +111,34 @@ public class SmartPad {
                 searchField.setText("Search");
             }
         });
-
 		JPanel panel1 = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		panel1.add(copyButton);
 		panel1.add(pasteButton);
 		panel1.add(printButton);
-		//panel1.add(textAlignComboBox__);
 		panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
 		panel1.add(searchField);
-		//panel1.add(fontSizeComboBox__);
-		//panel1.add(new JSeparator(SwingConstants.VERTICAL));
-		//panel1.add(fontFamilyComboBox__);		
-
 		JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		//panel2.add(searchField);
 		panel2.add(new JSeparator(SwingConstants.VERTICAL));
 		panel2.add(new JSeparator(SwingConstants.VERTICAL));
 		panel2.add(new JSeparator(SwingConstants.VERTICAL));
-		
 		JPanel toolBarPanel = new JPanel();
 		toolBarPanel.setLayout(new BoxLayout(toolBarPanel, BoxLayout.PAGE_AXIS));
 		toolBarPanel.add(panel1);
 		toolBarPanel.add(panel2);
 
+
+		//This is the left side pane with where the file selector and new file button is located.
 		JTextField newFile1 = new JTextField();
 		newFile1.setText("new file 1");
         ImageIcon newIcon = createImageIcon("/resources/plus.png", "New");
         JButton newButton = new JButton(newIcon);
-
         JPanel filesPanel = new JPanel();
         filesPanel.add(newFile1);
         JPanel newButtonPanel = new JPanel();
         newButtonPanel.add(newButton);
-
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.PAGE_AXIS));
         leftPanel.add(filesPanel);
