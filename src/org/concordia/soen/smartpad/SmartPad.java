@@ -80,12 +80,22 @@ public class SmartPad {
 	    }
 	}
 
+    private static void setLookAndFeel() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 	//Average user buttons
     private JButton hiddenCharacterButton;
+    private JButton searchButton;
 
 	//TODO this is the main point of entry in the application
 	private void createAndShowGUI() {
-	
+	    setLookAndFeel();
 		frame__ = new JFrame();
 		setFrameTitleWithExtn("New file");
 		editor__ = new JTextPane();
@@ -100,11 +110,11 @@ public class SmartPad {
 		//Icon bar with the images. Just put the images in the resources folder icons should be 24 x 24 to be the same size as the other ones.
 		ImageIcon copyIcon = createImageIcon("/resources/copy.png", "Copy");
 		JButton copyButton = new JButton(copyIcon);
-		ImageIcon pasteIcon = createImageIcon("/resources/paste.png", "Copy");
+		ImageIcon pasteIcon = createImageIcon("/resources/paste.png", "Paste");
 		JButton pasteButton = new JButton(pasteIcon);
-		ImageIcon printIcon = createImageIcon("/resources/print.png", "Copy");
+		ImageIcon printIcon = createImageIcon("/resources/print.png", "Print");
 		JButton printButton = new JButton(printIcon);
-        ImageIcon hiddenCharacterIcon = createImageIcon("/resources/print.png", "Copy");
+        ImageIcon hiddenCharacterIcon = createImageIcon("/resources/show_hidden.png", "Show hidden characters");
         hiddenCharacterButton = new JButton(hiddenCharacterIcon);
         hiddenCharacterButton.setVisible(false);
         String[] userTypeStrings = {"Beginner", "Average", "Expert"};
@@ -140,6 +150,47 @@ public class SmartPad {
                 searchField.setText("Search");
             }
         });
+        ImageIcon searchIcon = createImageIcon("/resources/find.png", "Search");
+        searchButton = new JButton(searchIcon);
+        searchButton.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                JFrame searchDialog = new JFrame();
+                searchDialog.setLocationRelativeTo(frame__);
+                searchDialog.setVisible(true);
+                searchDialog.setSize(300,200);
+                searchDialog.setTitle("Search");
+
+                JPanel averageUserPanel = new JPanel();
+                JTextField searchField = new JTextField();
+                searchField.setText("Search");
+                searchField.addFocusListener(new FocusListener() {
+                    public void focusGained(FocusEvent e) {
+                        searchField.setText("");
+                    }
+
+                    public void focusLost(FocusEvent e) {
+                        searchField.setText("Search");
+                    }
+                });
+                JTextField replaceField = new JTextField();
+                replaceField.setText("Replace");
+                replaceField.addFocusListener(new FocusListener() {
+                    public void focusGained(FocusEvent e) {
+                        replaceField.setText("");
+                    }
+
+                    public void focusLost(FocusEvent e) {
+                        replaceField.setText("Replace");
+                    }
+                });
+                averageUserPanel.add(searchField);
+                averageUserPanel.add(replaceField);
+                searchDialog.add(averageUserPanel);
+
+            }
+        });
 		JPanel panel1 = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		panel1.add(copyButton);
 		panel1.add(pasteButton);
@@ -149,16 +200,15 @@ public class SmartPad {
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
-		panel1.add(searchField);
-		panel1.add(userType);
-//		JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-//		panel2.add(new JSeparator(SwingConstants.VERTICAL));
-//		panel2.add(new JSeparator(SwingConstants.VERTICAL));
-//		panel2.add(new JSeparator(SwingConstants.VERTICAL));
+        panel1.add(userType);
+        panel1.add(searchField);
+        panel1.add(searchButton);
+        // to be activated by the average user type
+        searchButton.setVisible(false);
+
 		JPanel toolBarPanel = new JPanel();
 		toolBarPanel.setLayout(new BoxLayout(toolBarPanel, BoxLayout.PAGE_AXIS));
 		toolBarPanel.add(panel1);
-//		toolBarPanel.add(panel2);
 
 
 		//This is the left side pane with where the file selector and new file button is located.
@@ -271,6 +321,7 @@ public class SmartPad {
         encodingMenu.setVisible(true);
         macroMenu.setVisible(true);
         hiddenCharacterButton.setVisible(true);
+        searchButton.setVisible(true);
     }
 
 	//TODO fill this method
@@ -279,6 +330,7 @@ public class SmartPad {
         encodingMenu.setVisible(false);
         macroMenu.setVisible(false);
         hiddenCharacterButton.setVisible(false);
+        searchButton.setVisible(false);
     }
 
     private JMenu viewMenu;
