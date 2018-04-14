@@ -12,6 +12,8 @@ import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  * A text editor program with basic edit and format functions.
@@ -19,11 +21,11 @@ import java.io.*;
 public class SmartPad {
 
 	
-	private JFrame frame__;
-	private JTextPane editor__;
-	private UndoManager undoMgr__;
-	private File file__;
-    private JMenuBar menuBar;
+	 JFrame frame__;
+	 JTextPane editor__;
+	 UndoManager undoMgr__;
+	 File file__;
+     JMenuBar menuBar;
 
 
 	// This flag checks true if the caret position within a bulleted para
@@ -49,7 +51,7 @@ public class SmartPad {
 	private static final String NUMBERS_ATTR = "NUMBERS";
 	private static final String ELEM = AbstractDocument.ElementNameAttribute;
 	private static final String COMP = StyleConstants.ComponentElementName;
-
+    public static Map<String,StyledDocument> documents= new HashMap();
 	public JPanel leftPanel ;
 	public JPanel filesPanel;
 
@@ -104,8 +106,9 @@ public class SmartPad {
 		setFrameTitleWithExtn("New file");
 		editor__ = new JTextPane();
 		JScrollPane editorScrollPane = new JScrollPane(editor__);
-
-		editor__.setDocument(getNewDocument());
+		StyledDocument styledDocument =getNewDocument();
+		editor__.setDocument(styledDocument);
+		documents.put("newFile",styledDocument);
 		editor__.addKeyListener(new BulletParaKeyListener());
 		editor__.addKeyListener(new NumbersParaKeyListener());
 		editor__.addCaretListener(new EditorCaretListener());
@@ -279,11 +282,12 @@ public class SmartPad {
 
 		//This is the left side pane with where the file selector and new file button is located.
 		JTextField newFile1 = new JTextField();
-		newFile1.setText("new file 1");
-        ImageIcon newIcon = createImageIcon("/resources/plus.png", "New");
+		newFile1.setText("newFile");
+		newFile1.addMouseListener(new FileClickedMouseListener("newFile" , this));
+		ImageIcon newIcon = createImageIcon("/resources/plus.png", "New");
         JButton newButton = new JButton(newIcon);
-        JPanel filesPanel = new JPanel();
-        filesPanel.add(newFile1);
+         filesPanel = new JPanel();
+		filesPanel.add(newFile1);
         JPanel newButtonPanel = new JPanel();
         newButtonPanel.add(newButton);
         JPanel leftPanel = new JPanel();
@@ -1314,7 +1318,9 @@ public class SmartPad {
 		public void actionPerformed(ActionEvent e) {
 
 			initEditorAttributes();
-			editor__.setDocument(getNewDocument());
+			StyledDocument styledDocument =getNewDocument();
+			editor__.setDocument(styledDocument);
+			documents.put("New file",styledDocument);
 			file__ = null;
 			setFrameTitleWithExtn("New file");
 		}
@@ -1385,6 +1391,7 @@ public class SmartPad {
 			editor__.setDocument(doc);
 			doc.addUndoableEditListener(new UndoEditListener());
 			applyFocusListenerToPictures(doc);
+			documents.put(file.getName(),doc);
 			return doc;
 		}
 		
@@ -1408,6 +1415,7 @@ public class SmartPad {
 
 	private void addLabelToLeftMenu(String name) {
 		JTextField newFile1 = new JTextField();
+		newFile1.addMouseListener(new FileClickedMouseListener(name, this));
 		newFile1.setText(name);
 		filesPanel.add(newFile1);
 		filesPanel.revalidate();
