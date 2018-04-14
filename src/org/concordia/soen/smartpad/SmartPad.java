@@ -12,6 +12,7 @@ import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,6 +53,7 @@ public class SmartPad {
 	private static final String ELEM = AbstractDocument.ElementNameAttribute;
 	private static final String COMP = StyleConstants.ComponentElementName;
     public static Map<String,StyledDocument> documents= new HashMap();
+	public static int numberOfNewfiles=0;
 	public JPanel leftPanel ;
 	public JPanel filesPanel;
 
@@ -103,12 +105,12 @@ public class SmartPad {
 	private void createAndShowGUI() {
 	    setLookAndFeel();
 		frame__ = new JFrame();
-		setFrameTitleWithExtn("New file");
+		setFrameTitleWithExtn("newFile");
 		editor__ = new JTextPane();
 		JScrollPane editorScrollPane = new JScrollPane(editor__);
 		StyledDocument styledDocument =getNewDocument();
 		editor__.setDocument(styledDocument);
-		documents.put("newFile",styledDocument);
+		documents.put("newFile-"+numberOfNewfiles++,styledDocument);
 		editor__.addKeyListener(new BulletParaKeyListener());
 		editor__.addKeyListener(new NumbersParaKeyListener());
 		editor__.addCaretListener(new EditorCaretListener());
@@ -281,13 +283,14 @@ public class SmartPad {
 
 
 		//This is the left side pane with where the file selector and new file button is located.
-		JTextField newFile1 = new JTextField();
-		newFile1.setText("newFile");
-		newFile1.addMouseListener(new FileClickedMouseListener("newFile" , this));
+//		JTextField newFile1 = new JTextField();
+//		newFile1.setText("newFile");
+//		newFile1.addMouseListener(new FileClickedMouseListener("newFile" , this));
 		ImageIcon newIcon = createImageIcon("/resources/plus.png", "New");
         JButton newButton = new JButton(newIcon);
+		newButton.addMouseListener(new NewFileMouseClickedListener(this));
          filesPanel = new JPanel();
-		filesPanel.add(newFile1);
+		//filesPanel.add(newFile1);
         JPanel newButtonPanel = new JPanel();
         newButtonPanel.add(newButton);
         JPanel leftPanel = new JPanel();
@@ -441,7 +444,7 @@ public class SmartPad {
 		frame__.setTitle(MAIN_TITLE + titleExtn);
 	}
 	
-	private StyledDocument getNewDocument() {
+	StyledDocument getNewDocument() {
 	
 		StyledDocument doc = new DefaultStyledDocument();
 		doc.addUndoableEditListener(new UndoEditListener());
@@ -1413,7 +1416,7 @@ public class SmartPad {
 		}
 	}
 
-	private void addLabelToLeftMenu(String name) {
+	void addLabelToLeftMenu(String name) {
 		JTextField newFile1 = new JTextField();
 		newFile1.addMouseListener(new FileClickedMouseListener(name, this));
 		newFile1.setText(name);
