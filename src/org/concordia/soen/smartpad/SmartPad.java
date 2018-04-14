@@ -23,6 +23,7 @@ public class SmartPad {
 	private JTextPane editor__;
 	private UndoManager undoMgr__;
 	private File file__;
+    private JMenuBar menuBar;
 
 
 	// This flag checks true if the caret position within a bulleted para
@@ -79,6 +80,9 @@ public class SmartPad {
 	    }
 	}
 
+	//Average user buttons
+    private JButton hiddenCharacterButton;
+
 	//TODO this is the main point of entry in the application
 	private void createAndShowGUI() {
 	
@@ -100,7 +104,10 @@ public class SmartPad {
 		JButton pasteButton = new JButton(pasteIcon);
 		ImageIcon printIcon = createImageIcon("/resources/print.png", "Copy");
 		JButton printButton = new JButton(printIcon);
-		String[] userTypeStrings = {"Beginner", "Average", "Expert"};
+        ImageIcon hiddenCharacterIcon = createImageIcon("/resources/print.png", "Copy");
+        hiddenCharacterButton = new JButton(hiddenCharacterIcon);
+        hiddenCharacterButton.setVisible(false);
+        String[] userTypeStrings = {"Beginner", "Average", "Expert"};
 		JComboBox userType = new JComboBox(userTypeStrings);
 		userType.addActionListener(
                 new ActionListener(){
@@ -137,6 +144,7 @@ public class SmartPad {
 		panel1.add(copyButton);
 		panel1.add(pasteButton);
 		panel1.add(printButton);
+		panel1.add(hiddenCharacterButton);
 		panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
@@ -172,7 +180,7 @@ public class SmartPad {
 		frame__.add(editorScrollPane, BorderLayout.CENTER);
 		frame__.add(leftPanel, BorderLayout.WEST);
 
-		JMenuBar menuBar = new JMenuBar();
+
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 		
@@ -201,7 +209,8 @@ public class SmartPad {
 		fileMenu.add(saveItem);
 
 		fileMenu.addSeparator();
-		fileMenu.add(exitItem);		
+		fileMenu.add(exitItem);
+        menuBar = new JMenuBar();
 		menuBar.add(fileMenu);
 		frame__.setJMenuBar(menuBar);
 		
@@ -209,13 +218,65 @@ public class SmartPad {
 		frame__.setLocation(150, 80);
 		frame__.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame__.setVisible(true);
-		
+
+        createAverageUserUI();
+
 		editor__.requestFocusInWindow();
+
 	}
+
+    private JMenu encodingMenu;
+	private JMenu macroMenu;
+	private void createAverageUserUI() {
+        //Average user UI element creation
+        encodingMenu = new JMenu("Encoding");
+        encodingMenu.setMnemonic(KeyEvent.VK_E);
+        JMenuItem encodeInAnsi	= new JMenuItem("Encode in ANSI");
+        JMenuItem encodeInUTF8	= new JMenuItem("Encode in UTF-8");
+        JMenuItem encodeInUCS2	= new JMenuItem("Encode in UCS-2");
+        JMenuItem convertToAnsi	= new JMenuItem("Convert to ANSI");
+        JMenuItem convertToUTF8	= new JMenuItem("Convert to UTF-8");
+        JMenuItem convertToUCS2	= new JMenuItem("Convert to UCS-2");
+
+        encodingMenu.add(encodeInAnsi);
+        encodingMenu.add(encodeInUCS2);
+        encodingMenu.add(encodeInUTF8);
+        encodingMenu.add(convertToUCS2);
+        encodingMenu.add(convertToAnsi);
+        encodingMenu.add(convertToUTF8);
+
+        macroMenu = new JMenu("Macro");
+        macroMenu.setMnemonic(KeyEvent.VK_M);
+        JMenuItem recordMacro = new JMenuItem("Record Macro");
+        JMenuItem repeatMacro = new JMenuItem("Repeat Macro");
+        JMenuItem stopRecording = new JMenuItem("Stop Recording");
+        JMenuItem runOtherMacro = new JMenuItem("Run Other Macro");
+
+        macroMenu.add(recordMacro);
+        macroMenu.add(repeatMacro);
+        macroMenu.add(stopRecording);
+        macroMenu.add(runOtherMacro);
+
+        menuBar.add(encodingMenu);
+        menuBar.add(macroMenu);
+        encodingMenu.setVisible(false);
+        macroMenu.setVisible(false);
+    }
+
+    //TODO fill this method
+    private void loadAverageUI() {
+        System.out.println("Loading Average UI");
+        encodingMenu.setVisible(true);
+        macroMenu.setVisible(true);
+        hiddenCharacterButton.setVisible(true);
+    }
 
 	//TODO fill this method
     private void unloadAverageUI() {
 	    System.out.println("Unloading Average UI");
+        encodingMenu.setVisible(false);
+        macroMenu.setVisible(false);
+        hiddenCharacterButton.setVisible(false);
     }
 
     //TODO fill this method
@@ -226,11 +287,6 @@ public class SmartPad {
     //TODO fill this method
     private void loadExpertUI() {
         System.out.println("Loading Expert UI");
-    }
-
-    //TODO fill this method
-    private void loadAverageUI() {
-        System.out.println("Loading Average UI");
     }
 
     private void setFrameTitleWithExtn(String titleExtn) {
