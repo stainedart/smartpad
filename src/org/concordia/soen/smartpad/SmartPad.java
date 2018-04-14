@@ -12,7 +12,6 @@ import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.util.ArrayList;
 
 /*
  * A text editor program with basic edit and format functions.
@@ -24,6 +23,7 @@ public class SmartPad {
 	private JTextPane editor__;
 	private UndoManager undoMgr__;
 	private File file__;
+    private JMenuBar menuBar;
 
 
 	// This flag checks true if the caret position within a bulleted para
@@ -33,9 +33,9 @@ public class SmartPad {
 
 	// This flag checks true if the caret position within a numbered para
 	// is at the first text position after the number (number + dot + space).
-	// Alse see EditorCaretListener and NumbersParaKeyListener.
+	// Alse see EditorCaretListener and NumbersParaKeyListener.		
 	private boolean startPosPlusNum__;
-
+	
 	private static final String MAIN_TITLE = "SmartPad - ";
 	private static final String DEFAULT_FONT_FAMILY = "SansSerif";
 	private static final int DEFAULT_FONT_SIZE = 18;
@@ -49,7 +49,6 @@ public class SmartPad {
 	private static final String NUMBERS_ATTR = "NUMBERS";
 	private static final String ELEM = AbstractDocument.ElementNameAttribute;
 	private static final String COMP = StyleConstants.ComponentElementName;
-	static ArrayList<String> files=new ArrayList();
 
 	public JPanel leftPanel ;
 	public JPanel filesPanel;
@@ -60,17 +59,17 @@ public class SmartPad {
 		UIManager.put("TextPane.font",
 				new Font(DEFAULT_FONT_FAMILY, Font.PLAIN, DEFAULT_FONT_SIZE));
 		UIManager.setLookAndFeel(new NimbusLookAndFeel());
-
+		
 		SwingUtilities.invokeLater(new Runnable() {
-
+		
 			@Override
 			public void run() {
-
+			
 				new SmartPad().createAndShowGUI();
 			}
 		});
 	}
-
+	
 	/** Returns an ImageIcon, or null if the path was invalid. */
 	protected ImageIcon createImageIcon(String path,
 	                                           String description) {
@@ -83,9 +82,22 @@ public class SmartPad {
 	    }
 	}
 
+    private static void setLookAndFeel() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+	//Average user buttons
+    private JButton hiddenCharacterButton;
+    private JButton searchButton;
+
 	//TODO this is the main point of entry in the application
 	private void createAndShowGUI() {
-
+	    setLookAndFeel();
 		frame__ = new JFrame();
 		setFrameTitleWithExtn("New file");
 		editor__ = new JTextPane();
@@ -100,11 +112,14 @@ public class SmartPad {
 		//Icon bar with the images. Just put the images in the resources folder icons should be 24 x 24 to be the same size as the other ones.
 		ImageIcon copyIcon = createImageIcon("/resources/copy.png", "Copy");
 		JButton copyButton = new JButton(copyIcon);
-		ImageIcon pasteIcon = createImageIcon("/resources/paste.png", "Copy");
+		ImageIcon pasteIcon = createImageIcon("/resources/paste.png", "Paste");
 		JButton pasteButton = new JButton(pasteIcon);
-		ImageIcon printIcon = createImageIcon("/resources/print.png", "Copy");
+		ImageIcon printIcon = createImageIcon("/resources/print.png", "Print");
 		JButton printButton = new JButton(printIcon);
-		String[] userTypeStrings = {"Beginner", "Average", "Expert"};
+        ImageIcon hiddenCharacterIcon = createImageIcon("/resources/show_hidden.png", "Show hidden characters");
+        hiddenCharacterButton = new JButton(hiddenCharacterIcon);
+        hiddenCharacterButton.setVisible(false);
+        String[] userTypeStrings = {"Beginner", "Average", "Expert"};
 		JComboBox userType = new JComboBox(userTypeStrings);
 		userType.addActionListener(
                 new ActionListener(){
@@ -137,24 +152,65 @@ public class SmartPad {
                 searchField.setText("Search");
             }
         });
+        ImageIcon searchIcon = createImageIcon("/resources/find.png", "Search");
+        searchButton = new JButton(searchIcon);
+        searchButton.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                JFrame searchDialog = new JFrame();
+                searchDialog.setLocationRelativeTo(frame__);
+                searchDialog.setVisible(true);
+                searchDialog.setSize(300,200);
+                searchDialog.setTitle("Search");
+
+                JPanel averageUserPanel = new JPanel();
+                JTextField searchField = new JTextField();
+                searchField.setText("Search");
+                searchField.addFocusListener(new FocusListener() {
+                    public void focusGained(FocusEvent e) {
+                        searchField.setText("");
+                    }
+
+                    public void focusLost(FocusEvent e) {
+                        searchField.setText("Search");
+                    }
+                });
+                JTextField replaceField = new JTextField();
+                replaceField.setText("Replace");
+                replaceField.addFocusListener(new FocusListener() {
+                    public void focusGained(FocusEvent e) {
+                        replaceField.setText("");
+                    }
+
+                    public void focusLost(FocusEvent e) {
+                        replaceField.setText("Replace");
+                    }
+                });
+                averageUserPanel.add(searchField);
+                averageUserPanel.add(replaceField);
+                searchDialog.add(averageUserPanel);
+
+            }
+        });
 		JPanel panel1 = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		panel1.add(copyButton);
 		panel1.add(pasteButton);
 		panel1.add(printButton);
+		panel1.add(hiddenCharacterButton);
 		panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
-		panel1.add(searchField);
-		panel1.add(userType);
-//		JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-//		panel2.add(new JSeparator(SwingConstants.VERTICAL));
-//		panel2.add(new JSeparator(SwingConstants.VERTICAL));
-//		panel2.add(new JSeparator(SwingConstants.VERTICAL));
+        panel1.add(userType);
+        panel1.add(searchField);
+        panel1.add(searchButton);
+        // to be activated by the average user type
+        searchButton.setVisible(false);
+
 		JPanel toolBarPanel = new JPanel();
 		toolBarPanel.setLayout(new BoxLayout(toolBarPanel, BoxLayout.PAGE_AXIS));
 		toolBarPanel.add(panel1);
-//		toolBarPanel.add(panel2);
 
 
 		//This is the left side pane with where the file selector and new file button is located.
@@ -162,11 +218,11 @@ public class SmartPad {
 		newFile1.setText("new file 1");
         ImageIcon newIcon = createImageIcon("/resources/plus.png", "New");
         JButton newButton = new JButton(newIcon);
-        filesPanel= new JPanel();
+        JPanel filesPanel = new JPanel();
         filesPanel.add(newFile1);
         JPanel newButtonPanel = new JPanel();
         newButtonPanel.add(newButton);
-		leftPanel =new JPanel();
+        JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.PAGE_AXIS));
         leftPanel.add(filesPanel);
         leftPanel.add(newButtonPanel);
@@ -176,7 +232,7 @@ public class SmartPad {
 		frame__.add(editorScrollPane, BorderLayout.CENTER);
 		frame__.add(leftPanel, BorderLayout.WEST);
 
-		JMenuBar menuBar = new JMenuBar();
+
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 
@@ -194,7 +250,7 @@ public class SmartPad {
 		exitItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
+				
 				System.exit(0);
 			}
 		});
@@ -206,35 +262,110 @@ public class SmartPad {
 
 		fileMenu.addSeparator();
 		fileMenu.add(exitItem);
+        menuBar = new JMenuBar();
 		menuBar.add(fileMenu);
 		frame__.setJMenuBar(menuBar);
-
+		
 		frame__.setSize(900, 500);
 		frame__.setLocation(150, 80);
 		frame__.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame__.setVisible(true);
 
+		//Create and hide average and expert user UIs
+        createAverageUserUI();
+        createExpertUserUI();
+
 		editor__.requestFocusInWindow();
+
 	}
 
-	//TODO fill this method
-    private void unloadAverageUI() {
-	    System.out.println("Unloading Average UI");
-    }
+    private JMenu encodingMenu;
+	private JMenu macroMenu;
+	private void createAverageUserUI() {
+        //Average user UI element creation
+        encodingMenu = new JMenu("Encoding");
+        encodingMenu.setMnemonic(KeyEvent.VK_E);
+        JMenuItem encodeInAnsi	= new JMenuItem("Encode in ANSI");
+        JMenuItem encodeInUTF8	= new JMenuItem("Encode in UTF-8");
+        JMenuItem encodeInUCS2	= new JMenuItem("Encode in UCS-2");
+        JMenuItem convertToAnsi	= new JMenuItem("Convert to ANSI");
+        JMenuItem convertToUTF8	= new JMenuItem("Convert to UTF-8");
+        JMenuItem convertToUCS2	= new JMenuItem("Convert to UCS-2");
 
-    //TODO fill this method
-    private void unloadExpertUI() {
-        System.out.println("Unloading Expert UI");
-    }
+        encodingMenu.add(encodeInAnsi);
+        encodingMenu.add(encodeInUCS2);
+        encodingMenu.add(encodeInUTF8);
+        encodingMenu.add(convertToUCS2);
+        encodingMenu.add(convertToAnsi);
+        encodingMenu.add(convertToUTF8);
 
-    //TODO fill this method
-    private void loadExpertUI() {
-        System.out.println("Loading Expert UI");
+        macroMenu = new JMenu("Macro");
+        macroMenu.setMnemonic(KeyEvent.VK_M);
+        JMenuItem recordMacro = new JMenuItem("Record Macro");
+        JMenuItem repeatMacro = new JMenuItem("Repeat Macro");
+        JMenuItem stopRecording = new JMenuItem("Stop Recording");
+        JMenuItem runOtherMacro = new JMenuItem("Run Other Macro");
+
+        macroMenu.add(recordMacro);
+        macroMenu.add(repeatMacro);
+        macroMenu.add(stopRecording);
+        macroMenu.add(runOtherMacro);
+
+        menuBar.add(encodingMenu);
+        menuBar.add(macroMenu);
+        encodingMenu.setVisible(false);
+        macroMenu.setVisible(false);
     }
 
     //TODO fill this method
     private void loadAverageUI() {
         System.out.println("Loading Average UI");
+        encodingMenu.setVisible(true);
+        macroMenu.setVisible(true);
+        hiddenCharacterButton.setVisible(true);
+        searchButton.setVisible(true);
+    }
+
+	//TODO fill this method
+    private void unloadAverageUI() {
+	    System.out.println("Unloading Average UI");
+        encodingMenu.setVisible(false);
+        macroMenu.setVisible(false);
+        hiddenCharacterButton.setVisible(false);
+        searchButton.setVisible(false);
+    }
+
+    private JMenu viewMenu;
+    private void createExpertUserUI(){
+        viewMenu = new JMenu("View");
+        viewMenu.setMnemonic(KeyEvent.VK_M);
+
+        JMenuItem selectAll = new JMenuItem("Select All");
+        JMenuItem foldAll = new JMenuItem("Fold All");
+        JMenuItem unFoldAll = new JMenuItem("Unfold All");
+        JMenuItem synchronizeVerticalScroll = new JMenuItem("Synchronize Vertical Scroll");
+        JMenuItem wordWrap = new JMenuItem("Word Wrap");
+
+        viewMenu.add(selectAll);
+        viewMenu.add(foldAll);
+        viewMenu.add(unFoldAll);
+        viewMenu.add(synchronizeVerticalScroll);
+        viewMenu.add(wordWrap);
+
+        menuBar.add(viewMenu);
+        viewMenu.setVisible(false);
+    }
+
+    //TODO fill this method
+    private void unloadExpertUI() {
+        System.out.println("Unloading Expert UI");
+        viewMenu.setVisible(false);
+    }
+
+    //TODO fill this method
+    private void loadExpertUI() {
+        System.out.println("Loading Expert UI");
+        viewMenu.setVisible(true);
     }
 
     private void setFrameTitleWithExtn(String titleExtn) {
