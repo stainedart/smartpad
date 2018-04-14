@@ -219,7 +219,9 @@ public class SmartPad {
 		frame__.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame__.setVisible(true);
 
+		//Create and hide average and expert user UIs
         createAverageUserUI();
+        createExpertUserUI();
 
 		editor__.requestFocusInWindow();
 
@@ -279,14 +281,37 @@ public class SmartPad {
         hiddenCharacterButton.setVisible(false);
     }
 
+    private JMenu viewMenu;
+    private void createExpertUserUI(){
+        viewMenu = new JMenu("View");
+        viewMenu.setMnemonic(KeyEvent.VK_M);
+
+        JMenuItem selectAll = new JMenuItem("Select All");
+        JMenuItem foldAll = new JMenuItem("Fold All");
+        JMenuItem unFoldAll = new JMenuItem("Unfold All");
+        JMenuItem synchronizeVerticalScroll = new JMenuItem("Synchronize Vertical Scroll");
+        JMenuItem wordWrap = new JMenuItem("Word Wrap");
+
+        viewMenu.add(selectAll);
+        viewMenu.add(foldAll);
+        viewMenu.add(unFoldAll);
+        viewMenu.add(synchronizeVerticalScroll);
+        viewMenu.add(wordWrap);
+
+        menuBar.add(viewMenu);
+        viewMenu.setVisible(false);
+    }
+
     //TODO fill this method
     private void unloadExpertUI() {
         System.out.println("Unloading Expert UI");
+        viewMenu.setVisible(false);
     }
 
     //TODO fill this method
     private void loadExpertUI() {
         System.out.println("Loading Expert UI");
+        viewMenu.setVisible(true);
     }
 
     private void setFrameTitleWithExtn(String titleExtn) {
