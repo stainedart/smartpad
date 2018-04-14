@@ -91,6 +91,8 @@ public class SmartPad {
         }
     }
 
+    private String USER_TYPE = "Beginner";
+
 	//Average user buttons
     private JButton hiddenCharacterButton;
     private JButton searchButton;
@@ -128,13 +130,16 @@ public class SmartPad {
                         String currentUsertype = (String)combo.getSelectedItem();
                         System.out.println("Currently selecting user type:" + currentUsertype);
                         if( currentUsertype.equals("Average")){
+                            USER_TYPE = "Average";
                             loadAverageUI();
                             unloadExpertUI();
                         } else if (currentUsertype.equals("Expert")){
+                            USER_TYPE = "Expert";
                             loadAverageUI();
                             loadExpertUI();
                         } else {// beginner user case
                             System.out.println("Loading Beginner UI");
+                            USER_TYPE = "Beginner";
                             unloadExpertUI();
                             unloadAverageUI();
                         }
@@ -142,14 +147,16 @@ public class SmartPad {
                 }
         );
         JTextField searchField = new JTextField();
-        searchField.setText("Search");
+        searchField.setText("Search              ");
         searchField.addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
                 searchField.setText("");
             }
 
             public void focusLost(FocusEvent e) {
-                searchField.setText("Search");
+                if(searchField.getText().isEmpty()) {
+                    searchField.setText("Search              ");
+                }
             }
         });
         ImageIcon searchIcon = createImageIcon("/resources/find.png", "Search");
@@ -158,6 +165,7 @@ public class SmartPad {
         {
             public void actionPerformed(ActionEvent e)
             {
+                //Create the search popup
                 JFrame searchDialog = new JFrame();
                 searchDialog.setLocationRelativeTo(frame__);
                 searchDialog.setVisible(true);
@@ -165,32 +173,88 @@ public class SmartPad {
                 searchDialog.setTitle("Search");
 
                 JPanel averageUserPanel = new JPanel();
+                averageUserPanel.setLayout(new BoxLayout(averageUserPanel, BoxLayout.PAGE_AXIS));
+                JPanel searchPanel = new JPanel();
                 JTextField searchField = new JTextField();
-                searchField.setText("Search");
+                searchField.setText("Search              ");
                 searchField.addFocusListener(new FocusListener() {
                     public void focusGained(FocusEvent e) {
                         searchField.setText("");
                     }
 
                     public void focusLost(FocusEvent e) {
-                        searchField.setText("Search");
+                        if(searchField.getText().isEmpty()) {
+                            searchField.setText("Search              ");
+                        }
                     }
                 });
+                ImageIcon leftIcon = createImageIcon("/resources/left.png", "Previous");
+                JButton leftButton = new JButton(leftIcon);
+                ImageIcon nextIcon = createImageIcon("/resources/right.png", "Next");
+                JButton nextButton = new JButton(nextIcon);
+
+                JPanel replacePanel = new JPanel();
                 JTextField replaceField = new JTextField();
-                replaceField.setText("Replace");
+                replaceField.setText("Replace              ");
                 replaceField.addFocusListener(new FocusListener() {
                     public void focusGained(FocusEvent e) {
                         replaceField.setText("");
                     }
 
                     public void focusLost(FocusEvent e) {
-                        replaceField.setText("Replace");
+                        if(replaceField.getText().isEmpty()) {
+                            replaceField.setText("Replace              ");
+                        }
                     }
                 });
-                averageUserPanel.add(searchField);
-                averageUserPanel.add(replaceField);
-                searchDialog.add(averageUserPanel);
+                JButton replaceButton = new JButton("Replace");
+                JButton allButton = new JButton("Replace All");
 
+                searchPanel.add(searchField);
+                searchPanel.add(leftButton);
+                searchPanel.add(nextButton);
+
+                replacePanel.add(replaceField);
+                replacePanel.add(replaceButton);
+
+
+                averageUserPanel.add(searchPanel);
+                averageUserPanel.add(replacePanel);
+                averageUserPanel.add(allButton);
+
+                JPanel expertUserPanel = new JPanel();
+                expertUserPanel.setLayout(new BoxLayout(expertUserPanel, BoxLayout.PAGE_AXIS));
+                if(USER_TYPE.equals("Expert")){
+                    JTextField filesToIncludeField = new JTextField();
+                    filesToIncludeField.setText("File to include");
+                    filesToIncludeField.addFocusListener(new FocusListener() {
+                        public void focusGained(FocusEvent e) {
+                            filesToIncludeField.setText("");
+                        }
+
+                        public void focusLost(FocusEvent e) {
+                            if(filesToIncludeField.getText().isEmpty()) {
+                                filesToIncludeField.setText("File to include");
+                            }
+                        }
+                    });
+                    JTextField filesToExcludeField = new JTextField();
+                    filesToExcludeField.setText("File to exclude");
+                    filesToExcludeField.addFocusListener(new FocusListener() {
+                        public void focusGained(FocusEvent e) {
+                            filesToExcludeField.setText("");
+                        }
+
+                        public void focusLost(FocusEvent e) {
+                            if(filesToExcludeField.getText().isEmpty()){
+                                filesToExcludeField.setText("File to Exclude");
+                            }
+                        }
+                    });
+                    averageUserPanel.add(filesToIncludeField);
+                    averageUserPanel.add(filesToExcludeField);
+                }
+                searchDialog.add(averageUserPanel);
             }
         });
 		JPanel panel1 = new JPanel(new FlowLayout(FlowLayout.CENTER));
