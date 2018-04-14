@@ -12,6 +12,7 @@ import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.ArrayList;
 
 /*
  * A text editor program with basic edit and format functions.
@@ -23,7 +24,6 @@ public class SmartPad {
 	private JTextPane editor__;
 	private UndoManager undoMgr__;
 	private File file__;
-    private JMenuBar menuBar;
 
 
 	// This flag checks true if the caret position within a bulleted para
@@ -33,9 +33,9 @@ public class SmartPad {
 
 	// This flag checks true if the caret position within a numbered para
 	// is at the first text position after the number (number + dot + space).
-	// Alse see EditorCaretListener and NumbersParaKeyListener.		
+	// Alse see EditorCaretListener and NumbersParaKeyListener.
 	private boolean startPosPlusNum__;
-	
+
 	private static final String MAIN_TITLE = "SmartPad - ";
 	private static final String DEFAULT_FONT_FAMILY = "SansSerif";
 	private static final int DEFAULT_FONT_SIZE = 18;
@@ -49,25 +49,28 @@ public class SmartPad {
 	private static final String NUMBERS_ATTR = "NUMBERS";
 	private static final String ELEM = AbstractDocument.ElementNameAttribute;
 	private static final String COMP = StyleConstants.ComponentElementName;
+	static ArrayList<String> files=new ArrayList();
 
+	public JPanel leftPanel ;
+	public JPanel filesPanel;
 
 	public static void main(String [] args)
 			throws Exception {
 
-		UIManager.put("TextPane.font", 
+		UIManager.put("TextPane.font",
 				new Font(DEFAULT_FONT_FAMILY, Font.PLAIN, DEFAULT_FONT_SIZE));
 		UIManager.setLookAndFeel(new NimbusLookAndFeel());
-		
+
 		SwingUtilities.invokeLater(new Runnable() {
-		
+
 			@Override
 			public void run() {
-			
+
 				new SmartPad().createAndShowGUI();
 			}
 		});
 	}
-	
+
 	/** Returns an ImageIcon, or null if the path was invalid. */
 	protected ImageIcon createImageIcon(String path,
 	                                           String description) {
@@ -80,12 +83,9 @@ public class SmartPad {
 	    }
 	}
 
-	//Average user buttons
-    private JButton hiddenCharacterButton;
-
 	//TODO this is the main point of entry in the application
 	private void createAndShowGUI() {
-	
+
 		frame__ = new JFrame();
 		setFrameTitleWithExtn("New file");
 		editor__ = new JTextPane();
@@ -104,10 +104,7 @@ public class SmartPad {
 		JButton pasteButton = new JButton(pasteIcon);
 		ImageIcon printIcon = createImageIcon("/resources/print.png", "Copy");
 		JButton printButton = new JButton(printIcon);
-        ImageIcon hiddenCharacterIcon = createImageIcon("/resources/print.png", "Copy");
-        hiddenCharacterButton = new JButton(hiddenCharacterIcon);
-        hiddenCharacterButton.setVisible(false);
-        String[] userTypeStrings = {"Beginner", "Average", "Expert"};
+		String[] userTypeStrings = {"Beginner", "Average", "Expert"};
 		JComboBox userType = new JComboBox(userTypeStrings);
 		userType.addActionListener(
                 new ActionListener(){
@@ -144,7 +141,6 @@ public class SmartPad {
 		panel1.add(copyButton);
 		panel1.add(pasteButton);
 		panel1.add(printButton);
-		panel1.add(hiddenCharacterButton);
 		panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
@@ -166,11 +162,11 @@ public class SmartPad {
 		newFile1.setText("new file 1");
         ImageIcon newIcon = createImageIcon("/resources/plus.png", "New");
         JButton newButton = new JButton(newIcon);
-        JPanel filesPanel = new JPanel();
+        filesPanel= new JPanel();
         filesPanel.add(newFile1);
         JPanel newButtonPanel = new JPanel();
         newButtonPanel.add(newButton);
-        JPanel leftPanel = new JPanel();
+		leftPanel =new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.PAGE_AXIS));
         leftPanel.add(filesPanel);
         leftPanel.add(newButtonPanel);
@@ -180,10 +176,10 @@ public class SmartPad {
 		frame__.add(editorScrollPane, BorderLayout.CENTER);
 		frame__.add(leftPanel, BorderLayout.WEST);
 
-
+		JMenuBar menuBar = new JMenuBar();
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.setMnemonic(KeyEvent.VK_F);
-		
+
 		JMenuItem newItem	= new JMenuItem("New");
 		newItem.setMnemonic(KeyEvent.VK_N);
 		newItem.addActionListener(new NewFileListener());
@@ -198,7 +194,7 @@ public class SmartPad {
 		exitItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+
 				System.exit(0);
 			}
 		});
@@ -210,73 +206,20 @@ public class SmartPad {
 
 		fileMenu.addSeparator();
 		fileMenu.add(exitItem);
-        menuBar = new JMenuBar();
 		menuBar.add(fileMenu);
 		frame__.setJMenuBar(menuBar);
-		
+
 		frame__.setSize(900, 500);
 		frame__.setLocation(150, 80);
 		frame__.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame__.setVisible(true);
 
-        createAverageUserUI();
-
 		editor__.requestFocusInWindow();
-
 	}
-
-    private JMenu encodingMenu;
-	private JMenu macroMenu;
-	private void createAverageUserUI() {
-        //Average user UI element creation
-        encodingMenu = new JMenu("Encoding");
-        encodingMenu.setMnemonic(KeyEvent.VK_E);
-        JMenuItem encodeInAnsi	= new JMenuItem("Encode in ANSI");
-        JMenuItem encodeInUTF8	= new JMenuItem("Encode in UTF-8");
-        JMenuItem encodeInUCS2	= new JMenuItem("Encode in UCS-2");
-        JMenuItem convertToAnsi	= new JMenuItem("Convert to ANSI");
-        JMenuItem convertToUTF8	= new JMenuItem("Convert to UTF-8");
-        JMenuItem convertToUCS2	= new JMenuItem("Convert to UCS-2");
-
-        encodingMenu.add(encodeInAnsi);
-        encodingMenu.add(encodeInUCS2);
-        encodingMenu.add(encodeInUTF8);
-        encodingMenu.add(convertToUCS2);
-        encodingMenu.add(convertToAnsi);
-        encodingMenu.add(convertToUTF8);
-
-        macroMenu = new JMenu("Macro");
-        macroMenu.setMnemonic(KeyEvent.VK_M);
-        JMenuItem recordMacro = new JMenuItem("Record Macro");
-        JMenuItem repeatMacro = new JMenuItem("Repeat Macro");
-        JMenuItem stopRecording = new JMenuItem("Stop Recording");
-        JMenuItem runOtherMacro = new JMenuItem("Run Other Macro");
-
-        macroMenu.add(recordMacro);
-        macroMenu.add(repeatMacro);
-        macroMenu.add(stopRecording);
-        macroMenu.add(runOtherMacro);
-
-        menuBar.add(encodingMenu);
-        menuBar.add(macroMenu);
-        encodingMenu.setVisible(false);
-        macroMenu.setVisible(false);
-    }
-
-    //TODO fill this method
-    private void loadAverageUI() {
-        System.out.println("Loading Average UI");
-        encodingMenu.setVisible(true);
-        macroMenu.setVisible(true);
-        hiddenCharacterButton.setVisible(true);
-    }
 
 	//TODO fill this method
     private void unloadAverageUI() {
 	    System.out.println("Unloading Average UI");
-        encodingMenu.setVisible(false);
-        macroMenu.setVisible(false);
-        hiddenCharacterButton.setVisible(false);
     }
 
     //TODO fill this method
@@ -287,6 +230,11 @@ public class SmartPad {
     //TODO fill this method
     private void loadExpertUI() {
         System.out.println("Loading Expert UI");
+    }
+
+    //TODO fill this method
+    private void loadAverageUI() {
+        System.out.println("Loading Average UI");
     }
 
     private void setFrameTitleWithExtn(String titleExtn) {
@@ -1199,6 +1147,7 @@ public class SmartPad {
 			
 			readFile(file__);
 			setFrameTitleWithExtn(file__.getName());
+			addLabelToLeftMenu(file__.getName());
 		}
 		
 		private File chooseFile() {
@@ -1214,28 +1163,34 @@ public class SmartPad {
 			}
 		}
 		
-		private void readFile(File file) {
+		private StyledDocument readFile(File file) {
 	
-			StyledDocument doc = null;
-	
-			try (InputStream fis = new FileInputStream(file);
-					ObjectInputStream ois = new ObjectInputStream(fis)) {
-			
-				doc = (DefaultStyledDocument) ois.readObject();
-			}
-			catch (FileNotFoundException ex) {
+			StyledDocument doc = getNewDocument();
+			String fileAsString= "";
+			try {
+				InputStream fis = new FileInputStream(file);
 
-				JOptionPane.showMessageDialog(frame__, "Input file was not found!");
-				return;
+			BufferedReader buf = new BufferedReader(new InputStreamReader(fis));
+			String line = buf.readLine(); StringBuilder sb = new StringBuilder();
+				while(line != null){
+					sb.append(line).append("\n");
+					line = buf.readLine(); }
+				 fileAsString = sb.toString();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			catch (ClassNotFoundException | IOException ex) {
+			Style style = doc.addStyle("StyleName", null);
 
-				throw new RuntimeException(ex);
+			try {
+				doc.insertString(doc.getLength(), fileAsString,style);
+			} catch (BadLocationException e) {
+				e.printStackTrace();
 			}
-			
+
 			editor__.setDocument(doc);
 			doc.addUndoableEditListener(new UndoEditListener());
 			applyFocusListenerToPictures(doc);
+			return doc;
 		}
 		
 		private void applyFocusListenerToPictures(StyledDocument doc) {
@@ -1254,6 +1209,13 @@ public class SmartPad {
 				}
 			}
 		}
+	}
+
+	private void addLabelToLeftMenu(String name) {
+		JTextField newFile1 = new JTextField();
+		newFile1.setText(name);
+		filesPanel.add(newFile1);
+		filesPanel.revalidate();
 	}
 
 	private class SaveFileListener implements ActionListener {
