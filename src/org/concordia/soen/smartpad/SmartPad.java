@@ -100,6 +100,28 @@ public class SmartPad {
 		JButton pasteButton = new JButton(pasteIcon);
 		ImageIcon printIcon = createImageIcon("/resources/print.png", "Copy");
 		JButton printButton = new JButton(printIcon);
+		String[] userTypeStrings = {"Beginner", "Average", "Expert"};
+		JComboBox userType = new JComboBox(userTypeStrings);
+		userType.addActionListener(
+                new ActionListener(){
+                    public void actionPerformed(ActionEvent e){
+                        JComboBox combo = (JComboBox)e.getSource();
+                        String currentUsertype = (String)combo.getSelectedItem();
+                        System.out.println("Currently selecting user type:" + currentUsertype);
+                        if( currentUsertype.equals("Average")){
+                            loadAverageUI();
+                            unloadExpertUI();
+                        } else if (currentUsertype.equals("Expert")){
+                            loadAverageUI();
+                            loadExpertUI();
+                        } else {// beginner user case
+                            System.out.println("Loading Beginner UI");
+                            unloadExpertUI();
+                            unloadAverageUI();
+                        }
+                    }
+                }
+        );
         JTextField searchField = new JTextField();
         searchField.setText("Search");
         searchField.addFocusListener(new FocusListener() {
@@ -120,14 +142,15 @@ public class SmartPad {
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
         panel1.add(new JSeparator(SwingConstants.VERTICAL));
 		panel1.add(searchField);
-		JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		panel2.add(new JSeparator(SwingConstants.VERTICAL));
-		panel2.add(new JSeparator(SwingConstants.VERTICAL));
-		panel2.add(new JSeparator(SwingConstants.VERTICAL));
+		panel1.add(userType);
+//		JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+//		panel2.add(new JSeparator(SwingConstants.VERTICAL));
+//		panel2.add(new JSeparator(SwingConstants.VERTICAL));
+//		panel2.add(new JSeparator(SwingConstants.VERTICAL));
 		JPanel toolBarPanel = new JPanel();
 		toolBarPanel.setLayout(new BoxLayout(toolBarPanel, BoxLayout.PAGE_AXIS));
 		toolBarPanel.add(panel1);
-		toolBarPanel.add(panel2);
+//		toolBarPanel.add(panel2);
 
 
 		//This is the left side pane with where the file selector and new file button is located.
@@ -189,8 +212,28 @@ public class SmartPad {
 		
 		editor__.requestFocusInWindow();
 	}
-	
-	private void setFrameTitleWithExtn(String titleExtn) {
+
+	//TODO fill this method
+    private void unloadAverageUI() {
+	    System.out.println("Unloading Average UI");
+    }
+
+    //TODO fill this method
+    private void unloadExpertUI() {
+        System.out.println("Unloading Expert UI");
+    }
+
+    //TODO fill this method
+    private void loadExpertUI() {
+        System.out.println("Loading Expert UI");
+    }
+
+    //TODO fill this method
+    private void loadAverageUI() {
+        System.out.println("Loading Average UI");
+    }
+
+    private void setFrameTitleWithExtn(String titleExtn) {
 
 		frame__.setTitle(MAIN_TITLE + titleExtn);
 	}
