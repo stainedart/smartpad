@@ -1,12 +1,12 @@
 package org.concordia.soen.smartpad;
 
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
@@ -62,8 +62,8 @@ public class SmartPad {
 
 		UIManager.put("TextPane.font",
 				new Font(DEFAULT_FONT_FAMILY, Font.PLAIN, DEFAULT_FONT_SIZE));
-		UIManager.setLookAndFeel(new NimbusLookAndFeel());
-		
+		//UIManager.setLookAndFeel(new NimbusLookAndFeel());
+
 		SwingUtilities.invokeLater(new Runnable() {
 		
 			@Override
@@ -107,6 +107,8 @@ public class SmartPad {
 		frame__ = new JFrame();
 		setFrameTitleWithExtn("newFile");
 		editor__ = new JTextPane();
+		editor__.setEditorKit(new ShowParEditorKit());
+
 		JScrollPane editorScrollPane = new JScrollPane(editor__);
 		StyledDocument styledDocument =getNewDocument();
 		editor__.setDocument(styledDocument);
@@ -114,6 +116,7 @@ public class SmartPad {
 		editor__.addKeyListener(new BulletParaKeyListener());
 		editor__.addKeyListener(new NumbersParaKeyListener());
 		editor__.addCaretListener(new EditorCaretListener());
+        editor__.getDocument().putProperty("show paragraphs", "false");
 		undoMgr__ = new UndoManager();
 
 		//Icon bar with the images. Just put the images in the resources folder icons should be 24 x 24 to be the same size as the other ones.
@@ -125,6 +128,21 @@ public class SmartPad {
 		JButton printButton = new JButton(printIcon);
         ImageIcon hiddenCharacterIcon = createImageIcon("/resources/show_hidden.png", "Show hidden characters");
         hiddenCharacterButton = new JButton(hiddenCharacterIcon);
+        hiddenCharacterButton.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        boolean isShowParagraphs = false;
+                        if(editor__.getDocument().getProperty("show paragraphs")!=null) {
+                            isShowParagraphs = new Boolean(editor__.getDocument().getProperty("show paragraphs").toString());
+                        }if(!isShowParagraphs) {
+                            editor__.getDocument().putProperty("show paragraphs", "true");
+                        } else {
+                            editor__.getDocument().putProperty("show paragraphs", "false");
+                        }
+                        editor__.repaint();
+                    }
+                });
+
         hiddenCharacterButton.setVisible(false);
         String[] userTypeStrings = {"Beginner", "Average", "Expert"};
 		JComboBox userType = new JComboBox(userTypeStrings);

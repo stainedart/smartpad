@@ -22,6 +22,7 @@ public class FileClickedMouseListener implements MouseListener{
         System.out.print("mouseClicked" + this.fileName);
         StyledDocument styledDocument=smartPad.documents.get(this.fileName);
         smartPad.editor__.setDocument(styledDocument);
+
     }
 
     @Override
