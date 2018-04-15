@@ -2,6 +2,7 @@ package org.concordia.soen.smartpad;
 
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -308,7 +309,7 @@ public class SmartPad {
         JButton newButton = new JButton(newIcon);
 		newButton.addMouseListener(new NewFileMouseClickedListener(this));
          filesPanel = new JPanel();
-		//filesPanel.add(newFile1);
+        filesPanel.setLayout(new BoxLayout(filesPanel, BoxLayout.Y_AXIS));
         JPanel newButtonPanel = new JPanel();
         newButtonPanel.add(newButton);
         JPanel leftPanel = new JPanel();
@@ -327,7 +328,7 @@ public class SmartPad {
 
 		JMenuItem newItem	= new JMenuItem("New");
 		newItem.setMnemonic(KeyEvent.VK_N);
-		newItem.addActionListener(new NewFileListener());
+		newItem.addActionListener(new NewFileListener(this));
 		JMenuItem openItem	= new JMenuItem("Open...");
 		openItem.setMnemonic(KeyEvent.VK_O);
 		openItem.addActionListener(new OpenFileListener());
@@ -1333,17 +1334,22 @@ public class SmartPad {
 		
 	} // NumbersParaKeyListener
 
-	private class NewFileListener implements ActionListener {
+	public class NewFileListener implements ActionListener {
+        SmartPad smartPad;
+
+        public NewFileListener(SmartPad smartPad){
+            this.smartPad =smartPad;
+        }
+
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 
-			initEditorAttributes();
-			StyledDocument styledDocument =getNewDocument();
-			editor__.setDocument(styledDocument);
-			documents.put("New file",styledDocument);
-			file__ = null;
-			setFrameTitleWithExtn("New file");
+            StyledDocument sd =smartPad.getNewDocument();
+            smartPad.editor__.setDocument(sd);
+            String file= "newFile-"+smartPad.numberOfNewfiles++;
+            smartPad.documents.put(file,sd);
+            smartPad.addLabelToLeftMenu(file);
 		}
 		
 		private void initEditorAttributes() {
@@ -1435,11 +1441,29 @@ public class SmartPad {
 	}
 
 	void addLabelToLeftMenu(String name) {
-		JTextField newFile1 = new JTextField();
-		newFile1.addMouseListener(new FileClickedMouseListener(name, this));
-		newFile1.setText(name);
-		filesPanel.add(newFile1);
-		filesPanel.revalidate();
+		//JTextField newFile1 = new JTextField();
+
+        JPanel jPanel= new JPanel();
+        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.X_AXIS));
+
+        JLabel newFile1 = new JLabel("BottomRight", SwingConstants.CENTER);
+        newFile1.setBorder(BorderFactory.createLineBorder(Color.black));
+        newFile1.setLayout(new FlowLayout());
+        newFile1.addMouseListener(new FileClickedMouseListener(name, this,newFile1));
+        newFile1.setText(" "+ name+ " ");
+
+        JLabel closeFile = new JLabel("BottomRight", SwingConstants.CENTER);
+        closeFile.setBorder(BorderFactory.createLineBorder(Color.black));
+        closeFile.setLayout(new FlowLayout());
+        closeFile.addMouseListener(new FileCloseClickedMouseListener(name, this,jPanel));
+        closeFile.setText(" X ");
+
+
+        jPanel.add(newFile1);
+        jPanel.add(closeFile);
+        filesPanel.add(jPanel);
+
+        filesPanel.revalidate();
 	}
 
 	private class SaveFileListener implements ActionListener {

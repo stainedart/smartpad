@@ -1,6 +1,8 @@
 package org.concordia.soen.smartpad;
 
+import javax.swing.*;
 import javax.swing.text.StyledDocument;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -10,11 +12,13 @@ import java.awt.event.MouseListener;
 public class FileClickedMouseListener implements MouseListener{
      String fileName;
      SmartPad smartPad;
+    JLabel jLabel;
 
 
-    public FileClickedMouseListener(String name, SmartPad smartPad) {
+    public FileClickedMouseListener(String name, SmartPad smartPad,JLabel jLabel) {
         this.fileName = name;
         this.smartPad =smartPad;
+        this.jLabel=jLabel;
     }
 
     @Override
@@ -22,8 +26,10 @@ public class FileClickedMouseListener implements MouseListener{
         System.out.print("mouseClicked" + this.fileName);
         StyledDocument styledDocument=smartPad.documents.get(this.fileName);
         smartPad.editor__.setDocument(styledDocument);
-
+        smartPad.frame__.setTitle(this.fileName);
+        smartPad.filesPanel.revalidate();
     }
+
 
     @Override
     public void mousePressed(MouseEvent e) {
