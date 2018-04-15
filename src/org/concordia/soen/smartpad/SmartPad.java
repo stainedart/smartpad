@@ -2,7 +2,6 @@ package org.concordia.soen.smartpad;
 
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -13,7 +12,6 @@ import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,9 +23,12 @@ public class SmartPad {
 	
 	 JFrame frame__;
 	 JTextPane editor__;
+	 JTextPane sideEditor__;
+	 JSplitPane splitEditorPanel;
 	 UndoManager undoMgr__;
 	 File file__;
-     JMenuBar menuBar;
+	 JMenuBar menuBar;
+	 JScrollPane sideEditorScrollPane;
 
 
 	// This flag checks true if the caret position within a bulleted para
@@ -96,7 +97,20 @@ public class SmartPad {
         }
     }
 
-    private String USER_TYPE = "Beginner";
+    protected JTextPane createEditor(){
+        JTextPane editor = new JTextPane();
+        editor.setEditorKit(new ShowParEditorKit());
+        StyledDocument styledDocument =getNewDocument();
+        editor.setDocument(styledDocument);
+        documents.put("newFile-"+numberOfNewfiles++,styledDocument);
+        editor.addKeyListener(new BulletParaKeyListener());
+        editor.addKeyListener(new NumbersParaKeyListener());
+        editor.addCaretListener(new EditorCaretListener());
+        editor.getDocument().putProperty("show paragraphs", "false");
+        return editor;
+    }
+
+    String USER_TYPE = "Beginner";
 
 	//Average user buttons
     private JButton hiddenCharacterButton;
@@ -107,18 +121,12 @@ public class SmartPad {
 	    setLookAndFeel();
 		frame__ = new JFrame();
 		setFrameTitleWithExtn("newFile");
-		editor__ = new JTextPane();
-		editor__.setEditorKit(new ShowParEditorKit());
+		editor__ = createEditor();
+		sideEditor__ = createEditor();
+        JScrollPane editorScrollPane = new JScrollPane(editor__);
+        sideEditorScrollPane = new JScrollPane(sideEditor__);
 
-		JScrollPane editorScrollPane = new JScrollPane(editor__);
-		StyledDocument styledDocument =getNewDocument();
-		editor__.setDocument(styledDocument);
-		documents.put("newFile-"+numberOfNewfiles++,styledDocument);
-		editor__.addKeyListener(new BulletParaKeyListener());
-		editor__.addKeyListener(new NumbersParaKeyListener());
-		editor__.addCaretListener(new EditorCaretListener());
-        editor__.getDocument().putProperty("show paragraphs", "false");
-		undoMgr__ = new UndoManager();
+        undoMgr__ = new UndoManager();
 
 		//Icon bar with the images. Just put the images in the resources folder icons should be 24 x 24 to be the same size as the other ones.
 		ImageIcon copyIcon = createImageIcon("/resources/copy.png", "Copy");
@@ -302,13 +310,10 @@ public class SmartPad {
 
 
 		//This is the left side pane with where the file selector and new file button is located.
-//		JTextField newFile1 = new JTextField();
-//		newFile1.setText("newFile");
-//		newFile1.addMouseListener(new FileClickedMouseListener("newFile" , this));
 		ImageIcon newIcon = createImageIcon("/resources/plus.png", "New");
         JButton newButton = new JButton(newIcon);
 		newButton.addMouseListener(new NewFileMouseClickedListener(this));
-         filesPanel = new JPanel();
+		filesPanel = new JPanel();
         filesPanel.setLayout(new BoxLayout(filesPanel, BoxLayout.Y_AXIS));
         JPanel newButtonPanel = new JPanel();
         newButtonPanel.add(newButton);
@@ -319,8 +324,11 @@ public class SmartPad {
 
 
         frame__.add(toolBarPanel, BorderLayout.NORTH);
-		frame__.add(editorScrollPane, BorderLayout.CENTER);
-		frame__.add(leftPanel, BorderLayout.WEST);
+
+        splitEditorPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,editorScrollPane,sideEditorScrollPane);
+        sideEditorScrollPane.setVisible(false);
+        frame__.add(splitEditorPanel,BorderLayout.CENTER);
+        frame__.add(leftPanel, BorderLayout.WEST);
 
 
 		JMenu fileMenu = new JMenu("File");
@@ -1441,7 +1449,13 @@ public class SmartPad {
 	}
 
 	void addLabelToLeftMenu(String name) {
-		//JTextField newFile1 = new JTextField();
+
+//
+//        //Add listener to components that can bring up popup menus.
+//        MouseListener popupListener = new PopupListener();
+//
+//        //menuBar.addMouseListener(popupListener);
+
 
         JPanel jPanel= new JPanel();
         jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.X_AXIS));
@@ -1451,6 +1465,7 @@ public class SmartPad {
         newFile1.setLayout(new FlowLayout());
         newFile1.addMouseListener(new FileClickedMouseListener(name, this,newFile1));
         newFile1.setText(" "+ name+ " ");
+
 
         JLabel closeFile = new JLabel("BottomRight", SwingConstants.CENTER);
         closeFile.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -1465,6 +1480,23 @@ public class SmartPad {
 
         filesPanel.revalidate();
 	}
+//
+//    private class PopupListener extends MouseAdapter {
+//        public void mousePressed(MouseEvent e) {
+//            maybeShowPopup(e);
+//        }
+//
+//        public void mouseReleased(MouseEvent e) {
+//            maybeShowPopup(e);
+//        }
+//
+//        private void maybeShowPopup(MouseEvent e) {
+//            if (e.isPopupTrigger()) {
+//                popup.show(e.getComponent(),
+//                        e.getX(), e.getY());
+//            }
+//        }
+//    }
 
 	private class SaveFileListener implements ActionListener {
 

@@ -14,7 +14,7 @@ public class ShowParLabelView extends LabelView {
         if(getDocument().getProperty("show paragraphs")!=null) {
             isShowParagraphs = new Boolean(getDocument().getProperty("show paragraphs").toString());
         }
-        System.out.println(isShowParagraphs);
+
         super.paint(g, a);
         if (isShowParagraphs) {
             try {
