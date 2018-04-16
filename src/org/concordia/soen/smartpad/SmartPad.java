@@ -564,6 +564,7 @@ public class SmartPad {
     private void unloadExpertUI() {
         System.out.println("Unloading Expert UI");
         viewMenu.setVisible(false);
+        languageMenu.setVisible(false);
     }
 
     //TODO fill this method
