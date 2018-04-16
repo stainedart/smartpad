@@ -7,11 +7,14 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -140,6 +143,7 @@ public class SmartPad {
         hiddenCharacterButton.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
+                        usedComponent.add(hiddenCharacterButton);
                         boolean isShowParagraphs = false;
                         if(editor__.getDocument().getProperty("show paragraphs")!=null) {
                             isShowParagraphs = new Boolean(editor__.getDocument().getProperty("show paragraphs").toString());
@@ -165,15 +169,18 @@ public class SmartPad {
                             USER_TYPE = "Average";
                             loadAverageUI();
                             unloadExpertUI();
+                            goThroughUsedComponents();
                         } else if (currentUsertype.equals("Expert")){
                             USER_TYPE = "Expert";
                             loadAverageUI();
                             loadExpertUI();
+                            goThroughUsedComponents();
                         } else {// beginner user case
                             System.out.println("Loading Beginner UI");
                             USER_TYPE = "Beginner";
                             unloadExpertUI();
                             unloadAverageUI();
+                            goThroughUsedComponents();
                         }
                     }
                 }
@@ -197,6 +204,7 @@ public class SmartPad {
         {
             public void actionPerformed(ActionEvent e)
             {
+                usedComponent.add(searchButton);
                 //Create the search popup
                 JFrame searchDialog = new JFrame();
                 searchDialog.setLocationRelativeTo(frame__);
@@ -377,12 +385,30 @@ public class SmartPad {
 
 	}
 
+	ArrayList<Component> usedComponent = new ArrayList<Component>();
+
     private JMenu encodingMenu;
 	private JMenu macroMenu;
 	private void createAverageUserUI() {
         //Average user UI element creation
         encodingMenu = new JMenu("Encoding");
         encodingMenu.setMnemonic(KeyEvent.VK_E);
+        encodingMenu.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                usedComponent.add(encodingMenu);
+            }
+            @Override
+            public void menuDeselected(MenuEvent e) {
+                System.out.println("menuDeselected");
+
+            }
+            @Override
+            public void menuCanceled(MenuEvent e) {
+                System.out.println("menuCanceled");
+
+            }
+        });
         JMenuItem encodeInAnsi	= new JMenuItem("Encode in ANSI");
         JMenuItem encodeInUTF8	= new JMenuItem("Encode in UTF-8");
         JMenuItem encodeInUCS2	= new JMenuItem("Encode in UCS-2");
@@ -399,6 +425,22 @@ public class SmartPad {
 
         macroMenu = new JMenu("Macro");
         macroMenu.setMnemonic(KeyEvent.VK_M);
+        macroMenu.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                usedComponent.add(macroMenu);
+            }
+            @Override
+            public void menuDeselected(MenuEvent e) {
+                System.out.println("menuDeselected");
+
+            }
+            @Override
+            public void menuCanceled(MenuEvent e) {
+                System.out.println("menuCanceled");
+
+            }
+        });
         JMenuItem recordMacro = new JMenuItem("Record Macro");
         JMenuItem repeatMacro = new JMenuItem("Repeat Macro");
         JMenuItem stopRecording = new JMenuItem("Stop Recording");
@@ -413,6 +455,13 @@ public class SmartPad {
         menuBar.add(macroMenu);
         encodingMenu.setVisible(false);
         macroMenu.setVisible(false);
+        goThroughUsedComponents();
+    }
+
+    private void goThroughUsedComponents(){
+        for(int i = 0;i<usedComponent.size();i++){
+            usedComponent.get(i).setVisible(true);
+        }
     }
 
     //TODO fill this method
@@ -422,6 +471,7 @@ public class SmartPad {
         macroMenu.setVisible(true);
         hiddenCharacterButton.setVisible(true);
         searchButton.setVisible(true);
+        goThroughUsedComponents();
     }
 
 	//TODO fill this method
@@ -434,9 +484,26 @@ public class SmartPad {
     }
 
     private JMenu viewMenu;
+	private JMenu languageMenu;
     private void createExpertUserUI(){
         viewMenu = new JMenu("View");
         viewMenu.setMnemonic(KeyEvent.VK_M);
+        viewMenu.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                usedComponent.add(viewMenu);
+            }
+            @Override
+            public void menuDeselected(MenuEvent e) {
+                System.out.println("menuDeselected");
+
+            }
+            @Override
+            public void menuCanceled(MenuEvent e) {
+                System.out.println("menuCanceled");
+
+            }
+        });
 
         JMenuItem selectAll = new JMenuItem("Select All");
         JMenuItem foldAll = new JMenuItem("Fold All");
@@ -450,8 +517,47 @@ public class SmartPad {
         viewMenu.add(synchronizeVerticalScroll);
         viewMenu.add(wordWrap);
 
+        languageMenu = new JMenu("Language");
+        languageMenu.setMnemonic(KeyEvent.VK_M);
+        languageMenu.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                usedComponent.add(languageMenu);
+            }
+            @Override
+            public void menuDeselected(MenuEvent e) {
+                System.out.println("menuDeselected");
+
+            }
+            @Override
+            public void menuCanceled(MenuEvent e) {
+                System.out.println("menuCanceled");
+
+            }
+        });
+        JMenuItem htmlMenu = new JMenuItem("HTML");
+        JMenuItem javaMenu = new JMenuItem("Java");
+        JMenuItem javaScriptMenu = new JMenuItem("JavaScript");
+        JMenuItem phpMenu = new JMenuItem("PHP");
+        JMenuItem pythonMenu = new JMenuItem("Python");
+        JMenuItem shellMenu = new JMenuItem("Shell");
+        JMenuItem sqlMenu = new JMenuItem("SQL");
+        JMenuItem xmlMenu = new JMenuItem("XML");
+
+        languageMenu.add(htmlMenu);
+        languageMenu.add(javaMenu);
+        languageMenu.add(javaScriptMenu);
+        languageMenu.add(phpMenu);
+        languageMenu.add(pythonMenu);
+        languageMenu.add(shellMenu);
+        languageMenu.add(shellMenu);
+        languageMenu.add(sqlMenu);
+        languageMenu.add(xmlMenu);
+
         menuBar.add(viewMenu);
+        menuBar.add(languageMenu);
         viewMenu.setVisible(false);
+        languageMenu.setVisible(false);
     }
 
     //TODO fill this method
@@ -464,6 +570,8 @@ public class SmartPad {
     private void loadExpertUI() {
         System.out.println("Loading Expert UI");
         viewMenu.setVisible(true);
+        languageMenu.setVisible(true);
+        goThroughUsedComponents();
     }
 
     private void setFrameTitleWithExtn(String titleExtn) {
